@@ -3,7 +3,7 @@ run:
 	go run cmd/rest/main.go
  
 dev-air:
-	export $$(xargs < .env) && \	
+	export $$(xargs < .env) && \
 	air
 
 test:
