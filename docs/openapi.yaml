@@ -1,0 +1,151 @@
+openapi: 3.0.0
+info:
+  version: 0.0.1
+  title: 'Finkita service swagger docs'
+  description: 'Service for managing Early Settlement transaction and configuration'
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: 'https://virtserver.swaggerhub.com/Xendit/early-settlement-service/0.0.1'
+  - description: Local development
+    url: 'http://localhost:3000'
+paths:
+  /api/v1/accounts:
+    get:
+      tags:
+        - account
+      operationId: getAccounts
+      responses:
+        200:
+          description: A list of accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+    post:
+      tags:
+        - account
+      operationId: createAccount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountRequest'
+      responses:
+        201:
+          description: Created account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+  /api/v1/accounts/{id}:
+    get:
+      tags:
+        - account
+      operationId: getAccontById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 10
+      responses:
+        200:
+          description: An account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        # 404:
+        #   description: Account not found
+        #   content:
+        #     application/json:
+        #       schema:
+        #         $ref: '#/components/schemas'
+    patch:
+      tags:
+        - account
+      operationId: updateAccountById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: '10'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountUpdateRequest'
+      responses:
+        201:
+          description: Updated account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+
+components:
+  schemas:
+    Account:
+      type: object
+      properties:
+        id:
+          type: number
+          example: '10'
+        email:
+          type: string
+          nullable: true
+          example: '13'
+        bank:
+          type: string
+          nullable: true
+          example: 'Bender B. Rodriguez'
+        account_number:
+          type: string
+          nullable: true
+          example: 'Bending Unit'
+    AccountRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: 'aryuuu@example.com'
+        bank:
+          type: string
+          example: BNI
+        account_number:
+          type: string
+          example: '1337'
+        password:
+          type: string
+          example: 'str0ngp4ssw0rdzz'
+    AccountUpdateRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: 'aryuuu@example.com'
+        bank:
+          type: string
+          example: BNI
+        account_number:
+          type: string
+          example: '1337'
+        password:
+          type: string
+          example: 'str0ngp4ssw0rdzz'
+  parameters:
+    apiKey:
+      in: header
+      name: api-key
+      description: 'API Key'
+      schema:
+        type: string
+        example: 'dummyapikeyultrasecret'
+      required: true
