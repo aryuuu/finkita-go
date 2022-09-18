@@ -1,4 +1,10 @@
 .env
+.env.*
 bin/*
 tmp/*
+
+# docker volume
+postgres-data/*
+postgres-test-data/*
+
 
