@@ -2,13 +2,13 @@
 
 Financial Tracker App
 
-## How to run
-
 ### Prerequisite
 
 - go ^1.15
 - docker
 - docker-compose
+
+### How to run
 
 run service
 
@@ -44,4 +44,10 @@ build scraper
 
 ```bash
 make build-scraper
+```
+
+### Generating migration file
+
+```bash
+make name=[migration name]
 ```

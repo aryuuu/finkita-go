@@ -2,34 +2,120 @@ package service
 
 import (
 	"context"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"encoding/hex"
+	"fmt"
+	"log"
 
-	"github.com/aryuuu/finkita/internal/domain"
+	"github.com/aryuuu/finkita/domain"
+	"github.com/aryuuu/finkita/internal/configs"
 )
 
 // TODO: add repos
-type AccountService struct {
+type accountService struct {
+	accountRepo domain.IAccountRepository
 }
 
-func NewAccountService() *AccountService {
-	return &AccountService{}
+func NewAccountService(ar domain.IAccountRepository) domain.IAccountService {
+	return &accountService{
+		accountRepo: ar,
+	}
 }
 
-func (s AccountService) AddAccount(ctx context.Context, account *domain.Account) error {
-	return nil
+func (s *accountService) AddAccount(ctx context.Context, account *domain.Account) error {
+	var err error
+	account.Password, err = encryptPassword(account.Password)
+	if err != nil {
+		return fmt.Errorf("accountService.AddAccount: failed to encrypt account password: %v", err)
+	}
+
+	return s.accountRepo.AddAccount(ctx, account)
 }
 
-func (s AccountService) GetAccounts(ctx context.Context) ([]domain.Account, error) {
-	return []domain.Account{}, nil
+func (s *accountService) GetAccounts(ctx context.Context) ([]domain.Account, error) {
+	accounts, err := s.accountRepo.GetAccounts(ctx)
+	if err != nil {
+		return accounts, err
+	}
+
+	// for i := range accounts {
+	// 	decryptedPassword, err := decryptPassword(accounts[i].Password)
+	// 	if err != nil {
+	// 		log.Printf("failed to decrypt password for account: %+v, error: %v", accounts[i], err)
+	// 	}
+	// 	log.Printf("decryptedPassword: %s", decryptedPassword)
+	// 	accounts[i].Password = decryptedPassword
+	// 	log.Printf("account: %+v", accounts[i])
+	// }
+	// log.Printf("accounts: %+v", accounts)
+
+	return accounts, nil
 }
 
-func (s AccountService) GetAccountByID(ctx context.Context, id string) (domain.Account, error) {
-	return domain.Account{}, nil
+func (s *accountService) GetAccountByID(ctx context.Context, id string) (domain.Account, error) {
+	return s.accountRepo.GetAccountByID(ctx, id)
 }
 
-func (s AccountService) UpdateAccount(ctx context.Context, id string, account domain.Account) (domain.Account, error) {
-	return domain.Account{}, nil
+func (s *accountService) UpdateAccountByID(ctx context.Context, id string, account *domain.Account) error {
+	return s.accountRepo.UpdateAccountByID(ctx, id, account)
 }
 
-func (s AccountService) DeleteAccount(ctx context.Context, id string) (domain.Account, error) {
-	return domain.Account{}, nil
+func (s *accountService) DeleteAccount(ctx context.Context, id string) error {
+	return s.accountRepo.Delete(ctx, id)
+}
+
+func encryptPassword(password string) (string, error) {
+	passwordByte := []byte(password)
+	key := []byte(configs.Account.EncKey)
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+
+	aesgcm, err := cipher.NewGCM(block)
+	if err != nil {
+		log.Printf("error init aesgcm: %v", err)
+		return "", err
+	}
+
+	nonce := make([]byte, aesgcm.NonceSize())
+	rand.Read(nonce)
+
+	ciphertext := aesgcm.Seal(nonce, nonce, passwordByte, nil)
+	return fmt.Sprintf("%x", ciphertext), nil
+}
+
+func decryptPassword(encPassword string) (string, error) {
+	log.Printf("enckey: %s", configs.Account.EncKey)
+	if len(encPassword) == 0 {
+		return encPassword, nil
+	}
+
+	encPasswordBytes, err := hex.DecodeString(encPassword)
+	if err != nil {
+		log.Printf("failed to decode hex string of encrypted password, error: %v", err)
+		return "", err
+	}
+	block, err := aes.NewCipher([]byte(configs.Account.EncKey))
+	if err != nil {
+		return "", err
+	}
+
+	aesgcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", err
+	}
+
+	nonceSize := aesgcm.NonceSize()
+
+	_nonce, _cipher := encPasswordBytes[:nonceSize], encPasswordBytes[nonceSize:]
+
+	plaintext, err := aesgcm.Open(nil, _nonce, _cipher, nil)
+	if err != nil {
+		return "", err
+	}
+
+	return string(plaintext), nil
 }

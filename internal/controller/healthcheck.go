@@ -1,9 +1,8 @@
 package controller
 
 import (
-	"net/http"
+	"errors"
 
-	"github.com/aryuuu/finkita/internal/domain"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,8 +15,9 @@ func InitHealthCheckHandler(e *echo.Group) {
 }
 
 func (h *healthcheckHandler) livenessCheckHandler(c echo.Context) error {
-	body := domain.Healthcheck{
-		Message: "OK",
-	}
-	return c.JSON(http.StatusOK, body)
+	// body := domain.Healthcheck{
+	// 	Message: "OK",
+	// }
+	return errors.New("test error")
+	// return c.JSON(http.StatusOK, body)
 }

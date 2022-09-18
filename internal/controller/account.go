@@ -1,9 +1,10 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 
-	"github.com/aryuuu/finkita/internal/domain"
+	"github.com/aryuuu/finkita/domain"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,11 +17,11 @@ func InitAccountHandler(e *echo.Group, accountService domain.IAccountService) {
 		accountService: accountService,
 	}
 
-	e.POST("/", h.AddAccount)
-	e.GET("/", h.GetAccounts)
-    e.GET("/:id", h.GetAccountByID)
-	e.PATCH("/:id", h.UpdateAccount)
-	e.DELETE("/:id", h.DeleteAccount)
+	e.GET("/:id", h.GetAccountByID)
+	e.PATCH("/:id", h.UpdateAccountByID)
+	e.DELETE("/:id", h.DeleteAccountByID)
+	e.POST("", h.AddAccount)
+	e.GET("", h.GetAccounts)
 }
 
 func (h accountHandler) AddAccount(c echo.Context) error {
@@ -28,11 +29,13 @@ func (h accountHandler) AddAccount(c echo.Context) error {
 	err := c.Bind(&account)
 
 	if err != nil {
+		// TODO: maybe send response here
 		return err
 	}
 
 	err = h.accountService.AddAccount(c.Request().Context(), &account)
 	if err != nil {
+		// TODO: maybe send response here
 		return err
 	}
 
@@ -40,17 +43,50 @@ func (h accountHandler) AddAccount(c echo.Context) error {
 }
 
 func (h accountHandler) GetAccounts(c echo.Context) error {
-	return c.String(http.StatusOK, "GET /accounts")
+	log.Println("GET /accounts")
+	accounts, err := h.accountService.GetAccounts(c.Request().Context())
+
+	if err != nil {
+		// TODO: maybe send response here
+		return err
+	}
+
+	return c.JSON(http.StatusOK, accounts)
 }
 
 func (h accountHandler) GetAccountByID(c echo.Context) error {
-	return c.String(http.StatusOK, "GET /accounts/:id")
+	id := c.Param("id")
+	account, err := h.accountService.GetAccountByID(c.Request().Context(), id)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, account)
 }
 
-func (h accountHandler) UpdateAccount(c echo.Context) error {
-	return c.String(http.StatusOK, "PATCH /accounts/:id")
+func (h accountHandler) UpdateAccountByID(c echo.Context) error {
+	account := domain.Account{}
+	err := c.Bind(&account)
+
+	if err != nil {
+		return err
+	}
+
+	err = h.accountService.UpdateAccountByID(c.Request().Context(), "", &account)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusCreated, account)
 }
 
-func (h accountHandler) DeleteAccount(c echo.Context) error {
-	return c.String(http.StatusOK, "DELETE /accounts/:id")
+func (h accountHandler) DeleteAccountByID(c echo.Context) error {
+	id := c.Param("id")
+	err := h.accountService.DeleteAccount(c.Request().Context(), id)
+
+	if err != nil {
+		return err
+	}
+
+	return c.NoContent(http.StatusOK)
 }
