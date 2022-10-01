@@ -4,6 +4,7 @@ bin/*
 tmp/*
 
 # docker volume
+postgres-data/
 postgres-data/**
 postgres-test-data/*
 

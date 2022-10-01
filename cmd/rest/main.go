@@ -10,7 +10,6 @@ import (
 	"github.com/aryuuu/finkita/internal/repositories"
 	"github.com/aryuuu/finkita/internal/service"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
 	_ "github.com/lib/pq"
 )
 
@@ -20,6 +19,7 @@ func main() {
 	e.Use(middleware.ErrorLogger())
 	healtcheckGroup := e.Group("/healthcheck")
 	apiV1Group := e.Group("/api/v1")
+	apiV1Group.Use(middleware.Auth())
 	accountGroup := apiV1Group.Group("/accounts")
 	mutationGroup := apiV1Group.Group("/mutations")
 

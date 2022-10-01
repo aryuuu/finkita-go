@@ -1,9 +1,22 @@
 package main
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
+	"log"
+	"time"
 
-	"sourcegraph.com/sourcegraph/go-selenium"
+	"github.com/aryuuu/finkita/internal/configs"
+	"github.com/aryuuu/finkita/internal/repositories"
+	"github.com/aryuuu/finkita/internal/service"
+	_ "github.com/lib/pq"
+	selenium "sourcegraph.com/sourcegraph/go-selenium"
+)
+
+const (
+	userIDInputID   = "CorpId"
+	passwordInputID = "PassWord"
 )
 
 func main() {
@@ -31,7 +44,7 @@ func main() {
 	}
 	defer webDriver.Quit()
 
-	err = webDriver.Get("https://example.com")
+	err = webDriver.Get("https://ibank.bni.co.id/MBAWeb/FMB;jsessionid=00001cFOoVSaowNNAQUec1kioX7:1a1li5jho?page=Thin_SignOnRetRq.xml")
 	if err != nil {
 		fmt.Printf("Failed to load page: %s\n", err)
 		return
@@ -43,6 +56,76 @@ func main() {
 		fmt.Printf("Failed to get page title: %s", err)
 		return
 	}
+
+	dbCon := createDBConnection()
+	accountRepo := repositories.NewAccountRepo(dbCon)
+	accountService := service.NewAccountService(accountRepo)
+
+	// get accounts
+	accounts, err := accountService.GetAccountsWithPassword(context.Background())
+	if err != nil {
+		log.Printf("error getting all accounts: %v", err)
+	}
+
+	// log.Printf("accounts: %v", accounts)
+	if len(accounts) == 0 {
+		return
+	}
+
+	// login to each account
+	myAccount := accounts[0]
+	userIDTextInput, err := webDriver.FindElement(selenium.ById, userIDInputID)
+	log.Printf("userIDTextInput: %+v", userIDTextInput)
+	if err != nil {
+		log.Printf("failed to get user id text input element: %v", err)
+		return
+	}
+
+	passwordTextInput, err := webDriver.FindElement(selenium.ById, passwordInputID)
+	log.Printf("passwordTextInput: %+v", passwordTextInput)
+	if err != nil {
+		log.Printf("failed to get password text input element: %v", err)
+		return
+	}
+
+	err = userIDTextInput.SendKeys(myAccount.UserID)
+	if err != nil {
+		log.Printf("failed to send keys to user id: %v", err)
+		return
+	}
+	err = passwordTextInput.SendKeys(myAccount.Password)
+	if err != nil {
+		log.Printf("failed to send keys to password: %v", err)
+		return
+	}
+
+	loginButtonXPath := "//input[@type='submit']"
+	loginButton, err := webDriver.FindElement(selenium.ByXPATH, loginButtonXPath)
+	if err != nil {
+		log.Printf("failed to get login button element: %v", err)
+		return
+	}
+
+	err = loginButton.Click()
+	if err != nil {
+		log.Printf("failed to click login button: %v", err)
+		return
+	}
+
+	time.Sleep(2 * time.Second)
+
+	myPageTitle, err := webDriver.Title()
+	if err != nil {
+		log.Printf("failed to get my page title")
+		return
+	}
+
+	log.Printf("myPageTitle: %s", myPageTitle)
+
+	// get info
+	// logout
+
+	// webDriver.FindElement(selenium.ByXPATH, "")
 
 	// var elem selenium.WebElement
 	// elem, err = webDriver.FindElement(selenium.ByCSSSelector, ".repo .name")
@@ -61,4 +144,17 @@ func main() {
 	// output:
 	// Page title: go-selenium - Sourcegraph
 	// Repository: go-selenium
+}
+
+func createDBConnection() *sql.DB {
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		configs.Postgres.Host, configs.Postgres.Port, configs.Postgres.Username, configs.Postgres.Password, configs.Postgres.Database)
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		fmt.Printf("failed to create connection to postgres db: %v\n", err)
+		panic(err)
+	}
+
+	return db
 }
