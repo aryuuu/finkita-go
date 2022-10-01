@@ -174,6 +174,9 @@ components:
         bank:
           type: string
           example: 'Bender B. Rodriguez'
+        user_id:
+          type: string
+          example: 'benderbrodriguez'
         account_number:
           type: string
           example: 'Bending Unit'
@@ -182,6 +185,7 @@ components:
       required:
         - email
         - bank
+        - user_id
         - account_number
         - password
       properties:
@@ -191,6 +195,9 @@ components:
         bank:
           type: string
           example: BNI
+        user_id:
+          type: string
+          example: 'benderbrodriguez'
         account_number:
           type: string
           example: '1337'

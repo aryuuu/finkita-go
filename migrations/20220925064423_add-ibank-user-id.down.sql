@@ -1,0 +1,5 @@
+BEGIN;
+    ALTER TABLE accounts
+    DROP COLUMN IF EXISTS user_id;
+COMMIT;
+

@@ -40,16 +40,22 @@ func (s *accountService) GetAccounts(ctx context.Context) ([]domain.Account, err
 		return accounts, err
 	}
 
-	// for i := range accounts {
-	// 	decryptedPassword, err := decryptPassword(accounts[i].Password)
-	// 	if err != nil {
-	// 		log.Printf("failed to decrypt password for account: %+v, error: %v", accounts[i], err)
-	// 	}
-	// 	log.Printf("decryptedPassword: %s", decryptedPassword)
-	// 	accounts[i].Password = decryptedPassword
-	// 	log.Printf("account: %+v", accounts[i])
-	// }
-	// log.Printf("accounts: %+v", accounts)
+	return accounts, nil
+}
+
+func (s *accountService) GetAccountsWithPassword(ctx context.Context) ([]domain.Account, error) {
+	accounts, err := s.accountRepo.GetAccountsWithPassword(ctx)
+	if err != nil {
+		return accounts, err
+	}
+
+	for i := range accounts {
+		decryptedPassword, err := decryptPassword(accounts[i].Password)
+		if err != nil {
+			log.Printf("failed to decrypt password for account: %+v, error: %v", accounts[i], err)
+		}
+		accounts[i].Password = decryptedPassword
+	}
 
 	return accounts, nil
 }
@@ -88,7 +94,6 @@ func encryptPassword(password string) (string, error) {
 }
 
 func decryptPassword(encPassword string) (string, error) {
-	log.Printf("enckey: %s", configs.Account.EncKey)
 	if len(encPassword) == 0 {
 		return encPassword, nil
 	}
@@ -100,11 +105,13 @@ func decryptPassword(encPassword string) (string, error) {
 	}
 	block, err := aes.NewCipher([]byte(configs.Account.EncKey))
 	if err != nil {
+		log.Printf("failed to create new cipher: %v", err)
 		return "", err
 	}
 
 	aesgcm, err := cipher.NewGCM(block)
 	if err != nil {
+		log.Printf("failed to create new aesgcm cipher: %v", err)
 		return "", err
 	}
 
@@ -114,6 +121,7 @@ func decryptPassword(encPassword string) (string, error) {
 
 	plaintext, err := aesgcm.Open(nil, _nonce, _cipher, nil)
 	if err != nil {
+		log.Printf("failed to open aesgcm cipher: %v", err)
 		return "", err
 	}
 
