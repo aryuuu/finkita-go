@@ -35,7 +35,20 @@ func (s *accountService) AddAccount(ctx context.Context, account *domain.Account
 }
 
 func (s *accountService) GetAccounts(ctx context.Context) ([]domain.Account, error) {
-	accounts, err := s.accountRepo.GetAccounts(ctx)
+	accounts, err := s.accountRepo.GetAccounts(ctx, map[string]interface{}{})
+	if err != nil {
+		return accounts, err
+	}
+
+	return accounts, nil
+}
+
+func (s *accountService) GetAccountsByEmail(ctx context.Context, email string) ([]domain.Account, error) {
+	filter := map[string]interface{}{
+		"email": email,
+	}
+
+	accounts, err := s.accountRepo.GetAccounts(ctx, filter)
 	if err != nil {
 		return accounts, err
 	}

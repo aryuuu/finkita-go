@@ -19,6 +19,7 @@ type Account struct {
 type IAccountService interface {
 	AddAccount(ctx context.Context, account *Account) error
 	GetAccounts(ctx context.Context) ([]Account, error)
+	GetAccountsByEmail(ctx context.Context, email string) ([]Account, error)
 	GetAccountsWithPassword(ctx context.Context) ([]Account, error)
 	GetAccountByID(ctx context.Context, id string) (Account, error)
 	UpdateAccountByID(ctx context.Context, id string, account *Account) error
@@ -27,7 +28,7 @@ type IAccountService interface {
 
 type IAccountRepository interface {
 	AddAccount(ctx context.Context, account *Account) error
-	GetAccounts(ctx context.Context) ([]Account, error)
+	GetAccounts(ctx context.Context, filter map[string]interface{}) ([]Account, error)
 	GetAccountsWithPassword(ctx context.Context) ([]Account, error)
 	GetAccountByID(ctx context.Context, id string) (Account, error)
 	UpdateAccountByID(ctx context.Context, id string, account *Account) error

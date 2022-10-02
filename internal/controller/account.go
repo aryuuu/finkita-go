@@ -29,13 +29,14 @@ func (h accountHandler) AddAccount(c echo.Context) error {
 	err := c.Bind(&account)
 
 	if err != nil {
-		// TODO: maybe send response here
 		return err
 	}
 
+	email := c.Request().Header.Get("x-user-email")
+	account.Email = email
+
 	err = h.accountService.AddAccount(c.Request().Context(), &account)
 	if err != nil {
-		// TODO: maybe send response here
 		return err
 	}
 
@@ -44,10 +45,11 @@ func (h accountHandler) AddAccount(c echo.Context) error {
 
 func (h accountHandler) GetAccounts(c echo.Context) error {
 	log.Println("GET /accounts")
-	accounts, err := h.accountService.GetAccounts(c.Request().Context())
+	email := c.Request().Header.Get("x-user-email")
+	accounts, err := h.accountService.GetAccountsByEmail(c.Request().Context(), email)
 
 	if err != nil {
-		// TODO: maybe send response here
+		log.Printf("error in get accounts controller, propagating error: %v", err)
 		return err
 	}
 

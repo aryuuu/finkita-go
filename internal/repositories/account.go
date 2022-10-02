@@ -55,7 +55,7 @@ func (ar *accountRepo) AddAccount(ctx context.Context, account *domain.Account) 
 	return err
 }
 
-func (ar *accountRepo) GetAccounts(ctx context.Context) ([]domain.Account, error) {
+func (ar *accountRepo) GetAccounts(ctx context.Context, filter map[string]interface{}) ([]domain.Account, error) {
 	query := sq.Select(
 		"id",
 		"email",
@@ -64,8 +64,13 @@ func (ar *accountRepo) GetAccounts(ctx context.Context) ([]domain.Account, error
 		"account_number",
 	).
 		From("accounts").
-		Where(sq.Eq{"deleted_at": nil}).
-		PlaceholderFormat(sq.Dollar)
+		Where(sq.Eq{"deleted_at": nil})
+
+	if email, ok := filter["email"]; ok {
+		query = query.Where(sq.Eq{"email": email})
+	}
+
+	query = query.PlaceholderFormat(sq.Dollar)
 
 	queryString, _, _ := query.ToSql()
 	log.Printf("query: %s", queryString)
