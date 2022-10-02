@@ -23,6 +23,8 @@ paths:
       tags:
         - account
       operationId: getAccounts
+      parameters:
+        - $ref: '#/components/parameters/idToken'
       responses:
         200:
           description: A list of accounts
@@ -36,6 +38,8 @@ paths:
       tags:
         - account
       operationId: createAccount
+      parameters:
+        - $ref: '#/components/parameters/idToken'
       requestBody:
         required: true
         content:
@@ -55,6 +59,7 @@ paths:
         - account
       operationId: getAccontById
       parameters:
+        - $ref: '#/components/parameters/idToken'
         - name: id
           in: path
           required: true
@@ -79,6 +84,7 @@ paths:
         - account
       operationId: updateAccountById
       parameters:
+        - $ref: '#/components/parameters/idToken'
         - name: id
           in: path
           required: true
@@ -104,6 +110,7 @@ paths:
         - account
       operationId: deleteAccountByID
       parameters:
+        - $ref: '#/components/parameters/idToken'
         - name: id
           in: path
           required: true
@@ -124,6 +131,8 @@ paths:
       tags:
         - mutation
       operationId: getMutations
+      parameters:
+        - $ref: '#/components/parameters/idToken'
       responses:
         200:
           description: A list of mutations
@@ -140,6 +149,7 @@ paths:
         - mutation
       operationId: getMutationById
       parameters:
+        - $ref: '#/components/parameters/idToken'
         - name: id
           in: path
           required: true
@@ -267,6 +277,14 @@ components:
       in: header
       name: api-key
       description: 'API Key'
+      schema:
+        type: string
+        example: 'dummyapikeyultrasecret'
+      required: true
+    idToken:
+      in: header
+      name: id-token
+      description: 'ID Token'
       schema:
         type: string
         example: 'dummyapikeyultrasecret'
