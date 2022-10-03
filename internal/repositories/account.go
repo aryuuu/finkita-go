@@ -72,9 +72,6 @@ func (ar *accountRepo) GetAccounts(ctx context.Context, filter map[string]interf
 
 	query = query.PlaceholderFormat(sq.Dollar)
 
-	queryString, _, _ := query.ToSql()
-	log.Printf("query: %s", queryString)
-
 	rows, err := query.RunWith(ar.dbCon).QueryContext(ctx)
 	if err != nil {
 		log.Printf("error running query on get all accounts: %v", err)

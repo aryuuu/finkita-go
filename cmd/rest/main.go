@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
 	"github.com/aryuuu/finkita/internal/configs"
 	"github.com/aryuuu/finkita/internal/controller"
@@ -16,7 +15,6 @@ import (
 )
 
 func main() {
-	fmt.Printf("Hello World\n")
 	e := echo.New()
 	e.Use(middleware.CORS())
 	e.Use(customMiddleware.ErrorLogger())
@@ -42,8 +40,6 @@ func main() {
 }
 
 func createDBConnection() *sql.DB {
-	log.Printf("dbname: %s", configs.Postgres.Database)
-	log.Printf("dbport: %s", configs.Postgres.Port)
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		configs.Postgres.Host, configs.Postgres.Port, configs.Postgres.Username, configs.Postgres.Password, configs.Postgres.Database)
