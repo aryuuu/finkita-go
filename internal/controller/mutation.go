@@ -23,7 +23,8 @@ func InitMutationHandler(e *echo.Group, mutationService domain.IMutationService)
 }
 
 func (h mutationHandler) GetMutations(c echo.Context) error {
-	mutations, err := h.mutationService.GetMutations(c.Request().Context())
+	email := c.Request().Header.Get("x-user-email")
+	mutations, err := h.mutationService.GetMutationsByEmail(c.Request().Context(), email)
 	if err != nil {
 		log.Printf("error fetching mutations: %v", err)
 		return err

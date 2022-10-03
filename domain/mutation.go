@@ -22,11 +22,12 @@ type Mutation struct {
 type IMutationService interface {
 	AddMutation(ctx context.Context, mutation *Mutation) error
 	GetMutations(ctx context.Context) ([]Mutation, error)
+	GetMutationsByEmail(ctx context.Context, email string) ([]Mutation, error)
 	GetMutationByID(ctx context.Context, id string) (Mutation, error)
 }
 
 type IMutationRepository interface {
 	BulkAddMutation(ctx context.Context, mutations []Mutation) error
-	GetMutations(ctx context.Context) ([]Mutation, error)
+	GetMutations(ctx context.Context, filter map[string]interface{}) ([]Mutation, error)
 	GetMutationByID(ctx context.Context, id string) (Mutation, error)
 }

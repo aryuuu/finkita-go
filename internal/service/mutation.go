@@ -21,7 +21,15 @@ func (s mutationService) AddMutation(ctx context.Context, mutation *domain.Mutat
 }
 
 func (s mutationService) GetMutations(ctx context.Context) ([]domain.Mutation, error) {
-	return s.mutationRepo.GetMutations(ctx)
+	return s.mutationRepo.GetMutations(ctx, map[string]interface{}{})
+}
+
+func (s mutationService) GetMutationsByEmail(ctx context.Context, email string) ([]domain.Mutation, error) {
+	filter := map[string]interface{}{
+		"email": email,
+	}
+
+	return s.mutationRepo.GetMutations(ctx, filter)
 }
 
 func (s mutationService) GetMutationByID(ctx context.Context, id string) (domain.Mutation, error) {

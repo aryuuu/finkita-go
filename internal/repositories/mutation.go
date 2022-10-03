@@ -61,7 +61,7 @@ func (mr *mutationRepo) BulkAddMutation(ctx context.Context, mutations []domain.
 	return nil
 }
 
-func (mr *mutationRepo) GetMutations(ctx context.Context) ([]domain.Mutation, error) {
+func (mr *mutationRepo) GetMutations(ctx context.Context, filter map[string]interface{}) ([]domain.Mutation, error) {
 	query := sq.Select(
 		"id",
 		"account_id",
