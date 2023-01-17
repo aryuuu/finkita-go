@@ -9,3 +9,9 @@ services:
       - POSTGRES_DB=test
     ports:
       - 54329:5432
+
+  selenium-test:
+    image: 'selenium/standalone-chrome'
+    ports:
+      - 44441:4444
+

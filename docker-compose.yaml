@@ -10,7 +10,12 @@ services:
     ports:
       - 54328:5432
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - ._/postgres-data:/var/lib/postgresql/data
+
+  selenium:
+    image: 'selenium/standalone-chrome:108.0-20221219'
+    ports:
+      - 4444:4444
 
   web:
     build:
