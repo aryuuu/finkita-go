@@ -14,6 +14,20 @@ test:
 build: 
 	go build -o bin/rest cmd/rest/main.go 
 
+dev-env:
+	@ docker-compose up postgres -d
+	@ docker-compose up selenium -d
+
+down: 
+	@ docker-compose down
+
+run-daily-sync:
+	export $$(xargs < .env) && \
+	go run cmd/daily-sync/main.go
+
+build-daily-sync:
+	go build -o bin/daily-sync cmd/daily-sync/main.go 
+
 run-scraper:
 	export $$(xargs < .env) && \
 	go run cmd/scraper/main.go
