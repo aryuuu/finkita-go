@@ -41,13 +41,13 @@ func main() {
 		"browserName":   "chrome",
 		"chromeOptions": chromeCaps,
 	})
-	if webDriver, err = selenium.NewRemote(caps, "http://localhost:4444"); err != nil {
+	if webDriver, err = selenium.NewRemote(caps, configs.Scraper.SeleniumServerURL); err != nil {
 		fmt.Printf("Failed to open session: %s\n", err)
 		return
 	}
 	defer webDriver.Quit()
 
-	err = webDriver.Get("https://ibank.bni.co.id/MBAWeb/FMB;jsessionid=00001cFOoVSaowNNAQUec1kioX7:1a1li5jho?page=Thin_SignOnRetRq.xml")
+	err = webDriver.Get(configs.Scraper.BNIMobileWebURL)
 	if err != nil {
 		fmt.Printf("Failed to load page: %s\n", err)
 		return
